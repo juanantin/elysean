@@ -245,6 +245,17 @@ a { color: inherit; }
   font-size: clamp(11px, .85vw, 13px);
   opacity: .7;
 }
+.burn-pct {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(95, 224, 168, .12);
+  color: var(--green);
+  font-weight: 600;
+  letter-spacing: .02em;
+  opacity: 1;
+}
+.burn-pct[hidden] { display: none; }
 .burn-chart {
   display: block;
   width: calc(100% + 2 * var(--pad-x));

@@ -150,6 +150,10 @@ const CONFIG = {
 
     if (burns.status === "fulfilled") {
       animateBurnt(burns.value.burnt);
+      const pct = (burns.value.burnt / 1e9) * 100; // share of the 1B initial supply
+      const pctEl = $("burn-pct");
+      pctEl.textContent = `${pct.toFixed(pct < 1 ? 3 : 2)}% of supply`;
+      pctEl.hidden = false;
       drawChart(burns.value.points);
     } else console.warn("burn data:", burns.reason);
 
