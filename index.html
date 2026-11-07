@@ -14,7 +14,7 @@
   <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Urbanist:wght@600&family=Cinzel:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -39,7 +39,16 @@
     </header>
 
     <section class="content">
-      <h1 class="title">The Elysean</h1>
+      <h1 class="title">
+        <span class="title-text">The Elysean</span>
+        <span class="title-reflect" aria-hidden="true">The Elysean</span>
+      </h1>
+      <!-- Vertical-only blur that turns the reflection into light streaks -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <filter id="streak" x="-5%" y="-20%" width="110%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5 9" />
+        </filter>
+      </svg>
 
       <p class="line">
         Launched on
