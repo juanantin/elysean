@@ -27,7 +27,7 @@ a { color: inherit; }
   min-height: 100vh;
   min-height: 100svh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   isolation: isolate;
   overflow: clip;
   background:
@@ -77,17 +77,6 @@ a { color: inherit; }
   justify-content: space-between;
   padding: clamp(16px, 2.6vw, 24px) clamp(16px, 6vw, 104px);
 }
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: clamp(22px, 2.3vw, 36px);
-  letter-spacing: -0.01em;
-}
-.brand img { width: clamp(36px, 3.6vw, 58px); height: auto; }
-
 .x-link {
   display: grid;
   place-items: center;
@@ -125,7 +114,31 @@ a { color: inherit; }
   position: relative;
   z-index: 1;
   display: inline-block;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, .25);
+  /* White text with a slow, soft light sweeping across it */
+  background: linear-gradient(100deg,
+      #ffffff 0%, #ffffff 40%, #cfe2ff 47%, #ffffff 50%, #e3eeff 53%, #ffffff 60%, #ffffff 100%);
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(170, 205, 255, .35)) drop-shadow(0 2px 20px rgba(0, 0, 0, .3));
+  animation:
+    title-in 1.6s cubic-bezier(.2, .7, .2, 1) both,
+    title-glow 5s ease-in-out 1.6s infinite alternate,
+    title-sheen 9s ease-in-out 2s infinite;
+}
+@keyframes title-in {
+  from { opacity: 0; letter-spacing: .02em; filter: blur(14px) drop-shadow(0 0 0 rgba(170, 205, 255, 0)); }
+  to { opacity: 1; letter-spacing: -0.025em; filter: blur(0) drop-shadow(0 0 18px rgba(170, 205, 255, .35)) drop-shadow(0 2px 20px rgba(0, 0, 0, .3)); }
+}
+@keyframes title-glow {
+  from { filter: drop-shadow(0 0 12px rgba(170, 205, 255, .22)) drop-shadow(0 2px 20px rgba(0, 0, 0, .3)); }
+  to { filter: drop-shadow(0 0 28px rgba(170, 205, 255, .5)) drop-shadow(0 2px 20px rgba(0, 0, 0, .3)); }
+}
+@keyframes title-sheen {
+  0%, 55% { background-position: 100% 0; }
+  100% { background-position: 0% 0; }
 }
 /* Mirrored copy under the baseline: stretched, streaked and faded out */
 .title-reflect {
@@ -141,7 +154,10 @@ a { color: inherit; }
   filter: url(#streak);
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.25) 35%, #000 78%);
   mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.25) 35%, #000 78%);
-  animation: shimmer 6s ease-in-out infinite alternate;
+  animation: reflect-in 1.6s cubic-bezier(.2, .7, .2, 1) .3s both, shimmer 6s ease-in-out 1.9s infinite alternate;
+}
+@keyframes reflect-in {
+  from { opacity: 0; }
 }
 @keyframes shimmer {
   from { opacity: .5; transform: scaleY(-1.5); }
@@ -163,16 +179,12 @@ a { color: inherit; }
 .volta-o { display: inline-block; width: .82em; height: .82em; margin: 0 .02em; color: #2e9e72; -webkit-text-fill-color: initial; }
 .volta-o svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 0 5px rgba(160, 255, 210, .55)); }
 
-/* ---------- Built on Volta (bottom right) ---------- */
-.built-on {
-  justify-self: start;
-  padding: 0 clamp(16px, 6vw, 104px) clamp(16px, 3vh, 28px);
-}
+/* ---------- Built on Volta (top left, in the nav) ---------- */
 .built-on a {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
+  gap: 12px;
+  padding: 11px 22px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, .12);
   background: rgba(7, 11, 20, .5);
@@ -182,8 +194,8 @@ a { color: inherit; }
   transition: border-color .2s, background .2s;
 }
 .built-on a:hover { border-color: rgba(95, 224, 168, .5); background: rgba(7, 11, 20, .7); }
-.built-label { font-size: 13px; color: var(--muted); }
-.built-on .volta { font-size: 19px; }
+.built-label { font-size: 17px; color: var(--muted); }
+.built-on .volta { font-size: 30px; }
 
 /* ---------- Burn card ---------- */
 .burn-card {
@@ -331,11 +343,12 @@ a { color: inherit; }
     justify-self: stretch;
     width: auto;
     margin: 0;
-    padding: 30vh 16px 16px;
+    padding: 30vh 16px 28px;
   }
   .x-link { width: 44px; height: 44px; }
-  .content { padding-bottom: 16px; }
-  .built-on { padding: 0 16px 24px; }
+  .built-on a { padding: 7px 14px; gap: 8px; }
+  .built-label { font-size: 13px; }
+  .built-on .volta { font-size: 21px; }
   .stat { padding: 12px 12px 14px; }
   .stat dt { font-size: 10.5px; }
   .x-link svg { width: 20px; height: 20px; }
@@ -343,5 +356,5 @@ a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-video { display: none; }
-  .title-reflect { animation: none; }
+  .title-reflect, .title-text { animation: none; }
 }
