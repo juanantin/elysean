@@ -184,18 +184,14 @@ a { color: inherit; }
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .12);
-  background: rgba(7, 11, 20, .5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 6px 0;
   text-decoration: none;
-  transition: border-color .2s, background .2s;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .6);
+  transition: filter .2s;
 }
-.built-on a:hover { border-color: rgba(95, 224, 168, .5); background: rgba(7, 11, 20, .7); }
-.built-label { font-size: 17px; color: var(--muted); }
-.built-on .volta { font-size: 30px; }
+.built-on a:hover { filter: brightness(1.2); }
+.built-label { font-size: 17px; color: #e6ebf5; }
+.built-on .volta { font-size: 30px; background-image: linear-gradient(180deg, #6ff0b6, #2e9e72); filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .7)) drop-shadow(0 0 10px rgba(0, 0, 0, .45)); }
 
 /* ---------- Burn card ---------- */
 .burn-card {
@@ -282,6 +278,15 @@ a { color: inherit; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.fee-note {
+  margin: 0 calc(-1 * var(--pad-x));
+  padding: 10px var(--pad-x) 12px;
+  border-top: 1px solid rgba(110, 220, 175, .12);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--dim);
+}
+.fee-note strong { color: var(--muted); font-weight: 600; }
 .burn-chart.reveal { animation: reveal 2s cubic-bezier(.2,.7,.2,1) both; }
 @keyframes reveal {
   from { clip-path: inset(0 100% 0 0); }
@@ -346,7 +351,7 @@ a { color: inherit; }
     padding: 30vh 16px 28px;
   }
   .x-link { width: 44px; height: 44px; }
-  .built-on a { padding: 7px 14px; gap: 8px; }
+  .built-on a { gap: 8px; }
   .built-label { font-size: 13px; }
   .built-on .volta { font-size: 21px; }
   .stat { padding: 12px 12px 14px; }
