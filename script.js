@@ -3,7 +3,7 @@
    ========================================================= */
 const CONFIG = {
   // Contract address. Leave empty to show "Coming soon".
-  ca: "",
+  ca: "0xb2E5265EEb558e573D7c5154EB59235f614aCFb0",
 
   // Dashboard metrics — PLACEHOLDERS until live data is wired up.
   // Set any of these to null to show "—".
