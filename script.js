@@ -198,9 +198,37 @@ const CONFIG = {
   }
 
   /* ---------- Background video ---------- */
+  // iOS only autoplays muted inline video, and not at all in Low Power Mode.
+  // Keep the video invisible (poster shows) until it really plays, and retry
+  // on the first tap/scroll, which iOS counts as a user gesture.
   const video = document.querySelector(".hero-video");
-  if (video) {
-    const p = video.play && video.play();
-    if (p && p.catch) p.catch(() => {});
+  if (video && !reduce) {
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.setAttribute("muted", "");
+
+    const show = () => video.classList.add("is-playing");
+    video.addEventListener("playing", show);
+    video.addEventListener("timeupdate", function onTime() {
+      if (video.currentTime > 0) { show(); video.removeEventListener("timeupdate", onTime); }
+    });
+
+    const tryPlay = () => {
+      if (!video.paused) return;
+      const p = video.play();
+      if (p && p.catch) p.catch(() => {});
+    };
+    tryPlay();
+    video.addEventListener("canplay", tryPlay, { once: true });
+
+    const kick = () => {
+      tryPlay();
+      ["touchstart", "pointerdown", "scroll", "keydown"].forEach((e) => window.removeEventListener(e, kick));
+    };
+    ["touchstart", "pointerdown", "scroll", "keydown"].forEach((e) =>
+      window.addEventListener(e, kick, { passive: true })
+    );
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) tryPlay(); });
   }
 })();

@@ -49,6 +49,18 @@ a { color: inherit; }
   object-fit: cover;
   object-position: left top;
   display: block;
+  pointer-events: none;
+  /* Hidden until it is actually playing, so a blocked autoplay (e.g. iOS Low Power Mode)
+     shows the poster image behind it instead of Safari's play button. */
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+.hero-video.is-playing { opacity: 1; }
+.hero-video::-webkit-media-controls,
+.hero-video::-webkit-media-controls-start-playback-button,
+.hero-video::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+  -webkit-appearance: none;
 }
 
 /* Darken the bright sky behind the text (right side) and frame the edges */
@@ -245,11 +257,14 @@ a { color: inherit; }
   font-size: clamp(11px, .85vw, 13px);
   opacity: .7;
 }
+.burn-unit, .burn-value, .burn-head { position: relative; z-index: 1; }
+.burn-unit { opacity: 1; color: rgba(125, 135, 153, .75); }
 .burn-pct {
   margin-left: 8px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(95, 224, 168, .12);
+  background: #0f2420;
+  border: 1px solid rgba(95, 224, 168, .3);
   color: var(--green);
   font-weight: 600;
   letter-spacing: .02em;
@@ -259,7 +274,7 @@ a { color: inherit; }
 .burn-chart {
   display: block;
   width: calc(100% + 2 * var(--pad-x));
-  margin: -28px calc(-1 * var(--pad-x)) 0;
+  margin: -16px calc(-1 * var(--pad-x)) 0;
   height: clamp(54px, 5.5vw, 80px);
   pointer-events: none;
 }
