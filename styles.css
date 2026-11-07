@@ -106,7 +106,7 @@ a { color: inherit; }
 .content {
   align-self: center;
   justify-self: end;
-  width: min(720px, 100%);
+  width: min(600px, 100%);
   margin-right: clamp(16px, 6vw, 104px);
   padding-bottom: 6vh;
 }
@@ -165,7 +165,7 @@ a { color: inherit; }
 
 /* ---------- Built on Volta (bottom right) ---------- */
 .built-on {
-  justify-self: end;
+  justify-self: start;
   padding: 0 clamp(16px, 6vw, 104px) clamp(16px, 3vh, 28px);
 }
 .built-on a {
@@ -188,9 +188,11 @@ a { color: inherit; }
 /* ---------- Burn card ---------- */
 .burn-card {
   position: relative;
-  margin-top: clamp(24px, 4vh, 48px);
-  padding: clamp(20px, 2.4vw, 32px) clamp(20px, 2.6vw, 44px) 0;
-  border-radius: 22px;
+  --pad-x: clamp(16px, 1.8vw, 28px);
+  width: min(480px, 100%);
+  margin-top: clamp(16px, 3vh, 36px);
+  padding: clamp(14px, 1.6vw, 22px) var(--pad-x) 0;
+  border-radius: 18px;
   border: 1px solid var(--card-border);
   background:
     linear-gradient(180deg, rgba(20, 34, 40, .55), rgba(9, 16, 24, .7));
@@ -202,27 +204,27 @@ a { color: inherit; }
 .burn-head {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   color: var(--dim);
-  font-size: clamp(16px, 1.6vw, 26px);
+  font-size: clamp(14px, 1.1vw, 17px);
 }
-.flame { color: var(--green); flex: none; }
+.flame { color: var(--green); flex: none; width: 22px; height: 22px; }
 .fee-chip {
   margin-left: auto;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 999px;
   border: 1px solid rgba(95, 224, 168, .3);
   background: rgba(95, 224, 168, .08);
   color: var(--green);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: .02em;
   white-space: nowrap;
 }
 .burn-value {
-  margin-top: 8px;
+  margin-top: 6px;
   font-weight: 700;
-  font-size: clamp(36px, 4vw, 64px);
+  font-size: clamp(28px, 2.6vw, 42px);
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
@@ -231,38 +233,38 @@ a { color: inherit; }
   margin-top: 4px;
   color: var(--dim);
   letter-spacing: .08em;
-  font-size: clamp(13px, 1.25vw, 20px);
+  font-size: clamp(11px, .85vw, 13px);
   opacity: .7;
 }
 .burn-chart {
   display: block;
-  width: calc(100% + 2 * clamp(20px, 2.6vw, 44px));
-  margin: -40px calc(-1 * clamp(20px, 2.6vw, 44px)) 0;
-  height: clamp(70px, 9vw, 120px);
+  width: calc(100% + 2 * var(--pad-x));
+  margin: -28px calc(-1 * var(--pad-x)) 0;
+  height: clamp(54px, 5.5vw, 80px);
   pointer-events: none;
 }
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin: 0 calc(-1 * clamp(20px, 2.6vw, 44px));
+  margin: 0 calc(-1 * var(--pad-x));
   border-top: 1px solid rgba(110, 220, 175, .18);
   background: rgba(7, 12, 18, .35);
 }
 .stat {
-  padding: 14px clamp(14px, 2.6vw, 44px) 16px;
+  padding: 10px var(--pad-x) 12px;
   min-width: 0;
 }
 .stat + .stat { border-left: 1px solid rgba(110, 220, 175, .12); }
 .stat dt {
-  font-size: 12px;
+  font-size: 10.5px;
   color: var(--dim);
   letter-spacing: .04em;
   text-transform: uppercase;
 }
 .stat dd {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   font-weight: 600;
-  font-size: clamp(16px, 1.5vw, 22px);
+  font-size: clamp(14px, 1.05vw, 17px);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
@@ -279,9 +281,10 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 18px;
-  padding: 10px 10px 10px 18px;
-  border-radius: 14px;
+  width: min(480px, 100%);
+  margin-top: 12px;
+  padding: 7px 7px 7px 14px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, .12);
   background: rgba(9, 16, 24, .55);
   backdrop-filter: blur(10px);
@@ -304,8 +307,8 @@ a { color: inherit; }
   color: #04120c;
   background: var(--green);
   border: 0;
-  border-radius: 9px;
-  padding: 8px 14px;
+  border-radius: 8px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: filter .2s;
 }
@@ -332,7 +335,7 @@ a { color: inherit; }
   }
   .x-link { width: 44px; height: 44px; }
   .content { padding-bottom: 16px; }
-  .built-on { justify-self: center; padding: 0 16px 24px; }
+  .built-on { padding: 0 16px 24px; }
   .stat { padding: 12px 12px 14px; }
   .stat dt { font-size: 10.5px; }
   .x-link svg { width: 20px; height: 20px; }
