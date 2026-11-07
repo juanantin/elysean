@@ -5,6 +5,12 @@ const CONFIG = {
   // Contract address. Leave empty to show "Coming soon".
   ca: "",
 
+  // Dashboard metrics — PLACEHOLDERS until live data is wired up.
+  // Set any of these to null to show "—".
+  marketCap: 4820000,  // USD
+  volume24h: 612400,   // USD
+  holders: 3218,
+
   // Total ELYSEAN burnt (placeholder until live data is wired up).
   totalBurnt: 12486320,
 
@@ -37,6 +43,17 @@ const CONFIG = {
     };
     requestAnimationFrame(tick);
   }
+
+  /* ---------- Metrics ---------- */
+  const usd = new Intl.NumberFormat("en-US", {
+    style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 2,
+  });
+  const setStat = (id, v, f) => {
+    document.getElementById(id).textContent = v == null ? "—" : f(v);
+  };
+  setStat("stat-mc", CONFIG.marketCap, (v) => usd.format(v));
+  setStat("stat-vol", CONFIG.volume24h, (v) => usd.format(v));
+  setStat("stat-holders", CONFIG.holders, (v) => fmt.format(v));
 
   /* ---------- Sparkline ---------- */
   const W = 600, H = 140, PAD_TOP = 14, PAD_BOTTOM = 18;
