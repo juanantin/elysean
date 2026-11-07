@@ -8,8 +8,6 @@
   --green-deep: #2e9e72;
   --card-border: rgba(110, 220, 175, 0.32);
   --font: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;
-  /* Width of the background media on desktop. Set to 100% for a full-bleed video. */
-  --media-width: 56%;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -39,54 +37,38 @@ a { color: inherit; }
 
 .hero-media {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--media-width);
+  inset: 0;
   z-index: -3;
   overflow: hidden;
+  background: #1b2b44 url("assets/hero-poster.jpg") left top / cover no-repeat;
 }
 .hero-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 30% center;
+  object-position: left top;
   display: block;
 }
 
-/* Fade the media into the dark right side, plus a soft vignette */
+/* Darken the bright sky behind the text (right side) and frame the edges */
 .hero-shade {
   position: absolute;
   inset: 0;
   z-index: -2;
   pointer-events: none;
   background:
-    linear-gradient(90deg,
-      transparent 0%,
-      transparent calc(var(--media-width) - 22%),
-      rgba(7, 11, 20, .85) calc(var(--media-width) - 4%),
-      var(--bg) var(--media-width)),
-    linear-gradient(180deg, rgba(7, 11, 20, .55) 0%, transparent 18%, transparent 80%, rgba(7, 11, 20, .6) 100%);
+    linear-gradient(270deg,
+      rgba(6, 10, 20, .88) 0%,
+      rgba(6, 10, 20, .74) 30%,
+      rgba(6, 10, 20, .35) 50%,
+      rgba(6, 10, 20, 0) 64%),
+    linear-gradient(180deg,
+      rgba(6, 10, 20, .55) 0%,
+      rgba(6, 10, 20, 0) 20%,
+      rgba(6, 10, 20, 0) 72%,
+      rgba(6, 10, 20, .55) 100%);
 }
 
-/* Drifting cloud mist at the bottom */
-.hero-mist {
-  position: absolute;
-  left: 30%;
-  right: -10%;
-  bottom: -6%;
-  height: 32%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(40% 60% at 30% 80%, rgba(200, 215, 240, .18), transparent 70%),
-    radial-gradient(35% 55% at 60% 90%, rgba(200, 215, 240, .14), transparent 70%),
-    radial-gradient(30% 50% at 85% 85%, rgba(200, 215, 240, .12), transparent 70%);
-  filter: blur(14px);
-  animation: drift 26s ease-in-out infinite alternate;
-}
-@keyframes drift {
-  from { transform: translateX(-3%); }
-  to { transform: translateX(3%); }
-}
 
 /* ---------- Nav ---------- */
 .nav {
@@ -135,11 +117,12 @@ a { color: inherit; }
   font-size: clamp(48px, 6.4vw, 108px);
   line-height: 1;
   letter-spacing: -0.015em;
-  text-shadow: 0 4px 40px rgba(0, 0, 0, .4);
+  text-shadow: 0 4px 30px rgba(0, 0, 0, .55);
 }
 
 .line {
   margin: 0 0 .7em;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, .6);
   font-size: clamp(18px, 2vw, 34px);
   color: var(--muted);
   font-weight: 400;
@@ -258,17 +241,15 @@ a { color: inherit; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  :root { --media-width: 100%; }
   .hero-shade {
     background: linear-gradient(180deg,
-      rgba(7, 11, 20, .55) 0%,
-      rgba(7, 11, 20, .15) 18%,
-      rgba(7, 11, 20, .45) 45%,
-      rgba(7, 11, 20, .92) 72%,
+      rgba(6, 10, 20, .5) 0%,
+      rgba(6, 10, 20, 0) 16%,
+      rgba(6, 10, 20, .2) 34%,
+      rgba(6, 10, 20, .85) 58%,
       var(--bg) 100%);
   }
-  .hero-video { object-position: 40% top; }
-  .hero-mist { left: -10%; }
+  .hero-video, .hero-media { object-position: 22% top; background-position: 22% top; }
   .content {
     align-self: end;
     justify-self: stretch;
@@ -281,5 +262,5 @@ a { color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-mist { animation: none; }
+  .hero-video { display: none; }
 }

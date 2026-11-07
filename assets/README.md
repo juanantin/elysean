@@ -1,4 +1,4 @@
 # Assets
 
-- `hero.mp4` / `hero.webm` — background video (not added yet). Drop it here; the page picks it up automatically. `hero-poster.jpg` shows until it loads.
-- If the video is full-width, set `--media-width: 100%` in `styles.css`.
+- `hero.webm` / `hero.mp4` — background video (muted loop). `hero-poster.jpg` is its first frame, shown until it plays.
+- To swap the video, replace both files (and the poster) with the same names.
