@@ -1,88 +1,183 @@
 /* =========================================================
-   Site config — edit these values.
+   Site config
    ========================================================= */
 const CONFIG = {
-  // Contract address. Leave empty to show "Coming soon".
+  // Token contract on Elysium (chain id 99901).
   ca: "0xb2E5265EEb558e573D7c5154EB59235f614aCFb0",
 
-  // Dashboard metrics — PLACEHOLDERS until live data is wired up.
-  // Set any of these to null to show "—".
-  marketCap: 4820000,  // USD
-  volume24h: 612400,   // USD
-  holders: 3218,
+  // Every Volta token launches with exactly 1,000,000,000 supply.
+  // Burns reduce totalSupply, so Total Burnt = initial supply − current supply.
+  initialSupply: 1000000000n * 10n ** 18n,
 
-  // Total ELYSEAN burnt (placeholder until live data is wired up).
-  totalBurnt: 12486320,
+  // Live data sources (all public, all allow browser requests).
+  rpc: "https://rpc.volta.family",
+  explorerApi: "https://explorer-backend-production-8ca1.up.railway.app/api/v2",
+  dexscreener: "https://api.dexscreener.com/latest/dex/tokens/",
 
-  // Cumulative burn history used for the sparkline (any length, oldest first).
-  burnHistory: [
-    0.4, 0.6, 0.7, 0.9, 1.1, 1.2, 1.5, 1.7, 1.8, 2.1, 2.4, 2.6, 2.7,
-    3.1, 3.4, 3.6, 3.9, 4.0, 4.4, 4.9, 5.2, 5.4, 5.9, 6.5, 6.8, 7.3,
-    7.9, 8.4, 9.0, 9.8, 10.6, 11.4, 12.49,
-  ],
+  // How often the dashboard refreshes, in milliseconds.
+  refreshMs: 30000,
 };
 
 (function () {
   const fmt = new Intl.NumberFormat("en-US");
-
-  /* ---------- Count-up for total burnt ---------- */
-  const valueEl = document.getElementById("burn-value");
+  const usd = new Intl.NumberFormat("en-US", {
+    style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 2,
+  });
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const target = CONFIG.totalBurnt;
+  const $ = (id) => document.getElementById(id);
 
-  if (reduce) {
-    valueEl.textContent = fmt.format(target);
-  } else {
-    const duration = 1800;
-    const start = performance.now();
+  const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+  const ZERO_TOPIC = "0x" + "0".repeat(64);
+  const toTokens = (wei) => Number(wei / 10n ** 12n) / 1e6; // keeps 6 decimals
+
+  /* ---------- Data fetching ---------- */
+  async function rpcBatch(calls) {
+    const body = calls.map(([method, params], id) => ({ jsonrpc: "2.0", id, method, params }));
+    const res = await fetch(CONFIG.rpc, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error("rpc " + res.status);
+    const out = await res.json();
+    const byId = [];
+    for (const r of out) {
+      if (r.error) throw new Error(r.error.message);
+      byId[r.id] = r.result;
+    }
+    return byId;
+  }
+
+  // Total burnt + burn history (cumulative, by block) straight from the chain.
+  async function loadBurns() {
+    const [supplyHex, latestHex, burnLogs, mintLogs] = await rpcBatch([
+      ["eth_call", [{ to: CONFIG.ca, data: "0x18160ddd" }, "latest"]],
+      ["eth_blockNumber", []],
+      ["eth_getLogs", [{ address: CONFIG.ca, fromBlock: "0x0", toBlock: "latest", topics: [TRANSFER, null, ZERO_TOPIC] }]],
+      ["eth_getLogs", [{ address: CONFIG.ca, fromBlock: "0x0", toBlock: "latest", topics: [TRANSFER, ZERO_TOPIC] }]],
+    ]);
+    const supply = BigInt(supplyHex);
+    const latest = parseInt(latestHex, 16);
+    const start = mintLogs.length ? parseInt(mintLogs[0].blockNumber, 16) : null;
+
+    let cum = 0n;
+    const points = [];
+    if (start != null) points.push([start, 0]);
+    for (const log of burnLogs) {
+      cum += BigInt(log.data);
+      points.push([parseInt(log.blockNumber, 16), toTokens(cum)]);
+    }
+    if (!points.length) points.push([latest - 1, 0]);
+    points.push([latest, toTokens(cum)]);
+
+    return { burnt: toTokens(CONFIG.initialSupply - supply), points };
+  }
+
+  // Market cap + 24h volume from DexScreener (the most liquid pair).
+  async function loadMarket() {
+    const res = await fetch(CONFIG.dexscreener + CONFIG.ca);
+    if (!res.ok) throw new Error("dexscreener " + res.status);
+    const pairs = (await res.json()).pairs || [];
+    if (!pairs.length) return { marketCap: null, volume24h: null };
+    const main = pairs.reduce((a, b) => ((b.liquidity?.usd || 0) > (a.liquidity?.usd || 0) ? b : a));
+    return {
+      marketCap: main.marketCap ?? main.fdv ?? null,
+      volume24h: pairs.reduce((s, p) => s + (p.volume?.h24 || 0), 0),
+    };
+  }
+
+  // Holder count from Volta's Blockscout explorer.
+  async function loadHolders() {
+    const res = await fetch(`${CONFIG.explorerApi}/tokens/${CONFIG.ca}`);
+    if (!res.ok) throw new Error("explorer " + res.status);
+    const t = await res.json();
+    return t.holders_count != null ? Number(t.holders_count) : null;
+  }
+
+  /* ---------- Rendering ---------- */
+  const valueEl = $("burn-value");
+  let shownBurnt = 0;
+
+  function animateBurnt(target) {
+    const from = shownBurnt;
+    shownBurnt = target;
+    if (reduce || from === target) {
+      valueEl.textContent = fmt.format(Math.round(target));
+      return;
+    }
+    const duration = from === 0 ? 1800 : 1000;
+    const t0 = performance.now();
     const ease = (t) => 1 - Math.pow(1 - t, 4);
     const tick = (now) => {
-      const t = Math.min(1, (now - start) / duration);
-      valueEl.textContent = fmt.format(Math.round(target * ease(t)));
+      const t = Math.min(1, (now - t0) / duration);
+      valueEl.textContent = fmt.format(Math.round(from + (target - from) * ease(t)));
       if (t < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   }
 
-  /* ---------- Metrics ---------- */
-  const usd = new Intl.NumberFormat("en-US", {
-    style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 2,
-  });
-  const setStat = (id, v, f) => {
-    document.getElementById(id).textContent = v == null ? "—" : f(v);
+  const setText = (id, text) => {
+    const el = $(id);
+    if (el.textContent !== text) el.textContent = text;
   };
-  setStat("stat-mc", CONFIG.marketCap, (v) => usd.format(v));
-  setStat("stat-vol", CONFIG.volume24h, (v) => usd.format(v));
-  setStat("stat-holders", CONFIG.holders, (v) => fmt.format(v));
 
-  /* ---------- Sparkline ---------- */
+  // Step chart: burns happen in discrete buybacks, so the line steps up at each one.
   const W = 600, H = 140, PAD_TOP = 14, PAD_BOTTOM = 18;
-  const data = CONFIG.burnHistory;
-  if (data.length > 1) {
-    const min = Math.min(...data), max = Math.max(...data);
-    const span = max - min || 1;
-    const pts = data.map((v, i) => [
-      (i / (data.length - 1)) * W,
-      PAD_TOP + (1 - (v - min) / span) * (H - PAD_TOP - PAD_BOTTOM),
-    ]);
-    // Smooth path (Catmull-Rom → cubic Bézier)
-    let d = `M${pts[0][0]},${pts[0][1]}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-      d += ` C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}`;
-    }
-    const line = document.getElementById("burn-line");
-    line.setAttribute("d", d);
-    document.getElementById("burn-area").setAttribute("d", `${d} L${W},${H} L0,${H} Z`);
+  let chartRevealed = false;
 
-    if (!reduce) document.getElementById("burn-chart").classList.add("reveal");
+  function drawChart(points) {
+    const x0 = points[0][0], x1 = points[points.length - 1][0];
+    const max = Math.max(...points.map((p) => p[1])) || 1;
+    const sx = (b) => ((b - x0) / (x1 - x0 || 1)) * W;
+    const sy = (v) => PAD_TOP + (1 - v / max) * (H - PAD_TOP - PAD_BOTTOM);
+
+    let d = `M0,${sy(points[0][1])}`;
+    for (let i = 1; i < points.length; i++) {
+      const x = sx(points[i][0]);
+      d += ` L${x},${sy(points[i - 1][1])} L${x},${sy(points[i][1])}`;
+    }
+    $("burn-line").setAttribute("d", d);
+    $("burn-area").setAttribute("d", `${d} L${W},${H} L0,${H} Z`);
+
+    if (!chartRevealed && !reduce) {
+      $("burn-chart").classList.add("reveal");
+      chartRevealed = true;
+    }
   }
 
+  async function refresh() {
+    const [burns, market, holders] = await Promise.allSettled([loadBurns(), loadMarket(), loadHolders()]);
+
+    if (burns.status === "fulfilled") {
+      animateBurnt(burns.value.burnt);
+      drawChart(burns.value.points);
+    } else console.warn("burn data:", burns.reason);
+
+    if (market.status === "fulfilled") {
+      const { marketCap, volume24h } = market.value;
+      setText("stat-mc", marketCap == null ? "—" : usd.format(marketCap));
+      setText("stat-vol", volume24h == null ? "—" : usd.format(volume24h));
+    } else console.warn("market data:", market.reason);
+
+    if (holders.status === "fulfilled") {
+      setText("stat-holders", holders.value == null ? "—" : fmt.format(holders.value));
+    } else console.warn("holders:", holders.reason);
+  }
+
+  refresh();
+  let timer = setInterval(refresh, CONFIG.refreshMs);
+  // Pause while the tab is hidden; refresh right away when it comes back.
+  document.addEventListener("visibilitychange", () => {
+    clearInterval(timer);
+    if (!document.hidden) {
+      refresh();
+      timer = setInterval(refresh, CONFIG.refreshMs);
+    }
+  });
+
   /* ---------- Contract address ---------- */
-  const caValue = document.getElementById("ca-value");
-  const caCopy = document.getElementById("ca-copy");
+  const caValue = $("ca-value");
+  const caCopy = $("ca-copy");
   if (CONFIG.ca) {
     caValue.textContent = CONFIG.ca;
     caValue.title = CONFIG.ca;
@@ -98,7 +193,7 @@ const CONFIG = {
     });
   }
 
-  /* ---------- Video: fall back to poster if it fails to load ---------- */
+  /* ---------- Background video ---------- */
   const video = document.querySelector(".hero-video");
   if (video) {
     const p = video.play && video.play();
