@@ -20,4 +20,4 @@ Fetched in the visitor's browser and refreshed every 30s (paused while the tab i
 
 If a source is down, the last value stays on screen.
 - **Background video:** `assets/hero.webm` + `assets/hero.mp4` (+ `hero-poster.jpg`). Replace with the same names to swap.
-- **Links:** X → https://x.com/elysian_KNTQ, Volta → https://www.volta.family/token/0xb2E5265EEb558e573D7c5154EB59235f614aCFb0 (in `index.html`).
+- **Links:** X → https://x.com/elysian_KNTQ, Volta → https://www.volta.family/token/0xb7126d3be7C594b0ad3DC68EED791082A18Cc589 (in `index.html`).

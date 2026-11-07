@@ -3,7 +3,7 @@
    ========================================================= */
 const CONFIG = {
   // Token contract on Elysium (chain id 99901).
-  ca: "0xb2E5265EEb558e573D7c5154EB59235f614aCFb0",
+  ca: "0xb7126d3be7C594b0ad3DC68EED791082A18Cc589",
 
   // Every Volta token launches with exactly 1,000,000,000 supply.
   // Burns reduce totalSupply, so Total Burnt = initial supply − current supply.
