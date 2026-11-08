@@ -1,4 +1,4 @@
-# The Elysean
+# The Elysian
 
 Static landing page. No build step — open `index.html` or serve the folder:
 
